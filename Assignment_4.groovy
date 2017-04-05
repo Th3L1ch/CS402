@@ -23,18 +23,31 @@ XmlUtil.serialize(xmldata, writer)
 def writer2 = new StringWriter()  // html is written here by markup builder
 def markup = new groovy.xml.MarkupBuilder(writer2)  // the builder
 
-def xmlData = new XmlParser().parse('Bus_Timetable.xml')
-def columns = xmlData.'**'*.name
-def traincodes = columns.count {it.contains("tag0:Traincode")}
-//def traincodes = columns.count {it.contains("Traincode")}
-println traincodes
-//def xmlData = traincodes
-//println counter
+def xmlDat2 = new XmlSlurper().parse('Bus_Timetable.xml')
+//def xmlDat2 = new XmlSlurper().parse('testFile.xml')	//For testing
+def columns = ['Traincode','Querytime','Traindate','Origin','Destination','Status','Due in','Scheduled depart']
 
-if(traincodes == 0)
+def Traincodes = xmlDat2.depthFirst().findAll { it.name() == 'Traincode' }
+def Querytimes = xmlDat2.depthFirst().findAll { it.name() == 'Querytime' }
+def Traindates = xmlDat2.depthFirst().findAll { it.name() == 'Traindate' }
+def Origins = xmlDat2.depthFirst().findAll { it.name() == 'Origin' }
+def Destinations = xmlDat2.depthFirst().findAll { it.name() == 'Destination' }
+def Statuses = xmlDat2.depthFirst().findAll { it.name() == 'Status' }
+def Dueins = xmlDat2.depthFirst().findAll { it.name() == 'Duein' }
+def Schdeparts = xmlDat2.depthFirst().findAll { it.name() == 'Schdepart' }
+println Traincodes
+
+if(Traincodes.size() == 0)
 {
 	markup.html{
         head {
+			style(type:"text/css", '''
+			.bigPaddingAndGreen {
+				margin: 30px;
+				padding: 30px;
+				background-color: #00FF00
+			}
+			''')
             title: "Current trainstation data"
         }
         body(id: "main") {
@@ -51,18 +64,35 @@ if(traincodes == 0)
 }
 else
 {
-	def rowCount = traincodes
+	def rowCount = Traincodes.size()
 	
 	markup.html{
-		table(style: 'border:1px solid;text-align:center;') {
-			tr {
-				th()
-				columns.each { title -> th(title)}
+		head {
+			style(type:"text/css", '''
+			.bigPaddingAndGreen {
+				margin: 30px;
+				padding: 30px;
+				background-color: #00FF00
 			}
-			(1..rowCount).each { row ->
-				tr(style: 'border:1px solid;text-align:center;') {
-					td(style: 'border:1px solid;text-align:center;',row)
-					columns.each { td(columns.text()) }
+			''')
+            title: "Current trainstation data"
+        }
+		body(id: "main") {
+			table(style: 'border:1px solid;text-align:center;') {
+				tr {
+					columns.each { title -> th(title)}
+				}
+				(1..rowCount).each { row ->
+					tr(style: 'border:1px solid;text-align:center;') {
+						Traincodes[row-1].each { title -> td(title) }
+						Querytimes[row-1].each { title -> td(title) }
+						Traindates[row-1].each { title -> td(title) }
+						Origins[row-1].each { title -> td(title) }
+						Destinations[row-1].each { title -> td(title) }
+						Statuses[row-1].each { title -> td(title) }
+						Dueins[row-1].each { title -> td(title) }
+						Schdeparts[row-1].each { title -> td(title) }
+					}
 				}
 			}
 		}
